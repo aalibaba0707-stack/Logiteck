@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LogiTrack — Suivi de colis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --navy:#005A9C;--navy-dark:#002B5B;--white:#fff;--muted:#667f8f;
+      --gray-100:#f5f7fa;--gray-200:#eef2f6;--accent:#FFC107;
+      --radius:18px;--card-radius:14px;--shadow:0 8px 24px rgba(2,18,38,0.06);
+      --fw:'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+      --container:1100px;
+    }
+    html {scroll-behavior:smooth;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:var(--fw);background:var(--gray-100);color:#06202e;line-height:1.45;overflow-x:hidden}
+    .container{max-width:var(--container);padding:20px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;position:relative;z-index:1200}
+    .logo{display:flex;align-items:center;gap:12px}
+    .brand-mark{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:var(--white);background:linear-gradient(135deg,var(--navy),#0077c8);box-shadow:var(--shadow)}
+    .brand-title{font-weight:700;color:var(--navy);font-size:18px}
+    nav.desktop{display:none}
+    /* burger morph */
+    .burger{width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:var(--white);border-radius:50%;box-shadow:var(--shadow);cursor:pointer}
+    .burger-lines{position:relative;width:22px;height:14px}
+    .burger-lines span{position:absolute;left:0;width:100%;height:2px;background:#243b4a;border-radius:2px;transition:all .28s ease}
+    .burger-lines span:nth-child(1){top:0} .burger-lines span:nth-child(2){top:6px} .burger-lines span:nth-child(3){top:12px}
+    .burger.active .burger-lines span:nth-child(1){transform:rotate(45deg);top:6px}
+    .burger.active .burger-lines span:nth-child(2){opacity:0}
+    .burger.active .burger-lines span:nth-child(3){transform:rotate(-45deg);top:6px}
+    /* overlay */
+    .mobile-overlay{position:fixed;top:0;right:-100%;width:100%;height:100vh;display:flex;align-items:center;justify-content:center;background:rgba(0,43,91,0.95);backdrop-filter:blur(12px);transition:all .36s cubic-bezier(.2,.9,.2,1);z-index:1100;opacity:0;pointer-events:none}
+    .mobile-overlay.active{right:0;opacity:1;pointer-events:auto}
+    .mobile-menu{background:linear-gradient(180deg,var(--white),#fbfdff);width:84%;max-width:360px;padding:28px;border-radius:22px;box-shadow:0 18px 40px rgba(2,18,38,0.28);transform:translateX(50px);opacity:0;transition:all .36s cubic-bezier(.2,.9,.2,1)}
+    .mobile-overlay.active .mobile-menu{transform:translateX(0);opacity:1}
+    .mobile-menu a{display:block;color:var(--navy);text-decoration:none;font-weight:700;font-size:18px;padding:10px 0}
+    .mobile-menu .small{font-size:13px;color:var(--muted);font-weight:500;margin-top:8px}
+    /* hero */
+    .hero{margin-top:20px;background:var(--white);padding:22px;border-radius:18px;box-shadow:var(--shadow);animation:fadeIn .7s both;display:flex;flex-direction:column;gap:12px}
+    .hero h1{font-size:20px;margin:0;color:var(--navy);font-weight:700}
+    .hero p{margin:0;color:#294254}
+    .search-row{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+    .input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--gray-200);background:var(--gray-100);font-size:15px}
+    .input:focus{outline:none;box-shadow:0 0 0 4px rgba(0,90,156,0.08);border-color:var(--navy)}
+    .btn{padding:12px 16px;border-radius:12px;border:none;font-weight:700;cursor:pointer}
+    .btn-primary{background:var(--navy);color:var(--white)}
+    .muted{color:var(--muted);font-size:13px}
+    .results{margin-top:18px;display:none;animation:fadeIn .4s both}
+    .status-card{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--white);border:1px solid var(--gray-200);box-shadow:0 12px 30px rgba(2,18,38,0.06)}
+    .status-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 6px rgba(255,193,7,0.08)}
+    .status-text{font-weight:700;color:#16324a}
+    .meta{font-size:13px;color:#4a6476}
+    .timeline{margin-top:12px}
+    .event{padding:12px;border-radius:12px;background:var(--white);border:1px solid var(--gray-200);margin-bottom:10px;box-shadow:0 10px 24px rgba(2,18,38,0.06)}
+    .event.recent{border-left:4px solid var(--accent);background:linear-gradient(90deg,#fffaf0,#ffffff)}
+    /* features */
+    .features{margin-top:22px;display:grid;grid-template-columns:1fr;gap:12px}
+    .feature-card{background:var(--white);padding:16px;border-radius:12px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:flex-start}
+    .icon-wrap{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(180deg,#f8fafc,#ffffff);border:1px solid var(--gray-200)}
+    .feature-title{font-weight:700;color:var(--navy);margin-bottom:6px}
+    .feature-desc{color:#465b65;font-size:14px}
+    /* how it works */
+    .how{margin-top:26px;padding:18px 0}
+    .steps{display:flex;gap:12px;overflow:auto;padding-bottom:6px}
+    .step{min-width:200px;background:var(--white);padding:14px;border-radius:12px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center}
+    .step strong{display:block;color:var(--navy);margin-bottom:6px}
+    /* testimonials */
+    .testimonials{margin-top:26px;display:flex;flex-direction:column;gap:12px}
+    .testimonial{background:var(--white);padding:14px;border-radius:12px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center}
+    .avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#e9f0fb,#ffffff);display:grid;place-items:center;font-weight:700;color:var(--navy)}
+    /* cta */
+    .cta{margin-top:28px;background:linear-gradient(90deg,var(--navy),var(--navy-dark));color:var(--white);padding:18px;border-radius:14px;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center}
+    .cta .btn{background:var(--accent);color:#06202e;border-radius:12px;padding:12px 20px;font-weight:800}
+    footer{margin-top:30px;padding:18px 0;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--gray-200)}
+    a{color:inherit}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    @media(min-width:820px){.features{grid-template-columns:repeat(4,1fr)} .steps{overflow:visible} .hero{flex-direction:row;align-items:center;gap:20px} .search-row{flex-direction:row;align-items:center} .input{flex:1} nav.desktop{display:flex;gap:18px} .burger{display:none}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo"><div class="brand-mark">LT</div><div class="brand-title">LogiTrack</div></div>
+      <nav class="desktop" aria-label="Navigation">
+        <a href="#suivre">Suivre</a>
+        <a href="#fonctions">Fonctionnalités</a>
+        <a href="#how">Comment ça marche</a>
+        <a href="about.html">À propos</a>
+      </nav>
+      <div class="burger" id="menuBtn" aria-label="Ouvrir le menu" role="button" tabindex="0">
+        <div class="burger-lines"><span></span><span></span><span></span></div>
+      </div>
+    </header>
+
+    <div id="mobileOverlay" class="mobile-overlay" aria-hidden="true">
+      <nav class="mobile-menu" role="menu" aria-label="Menu mobile">
+        <a href="#suivre" role="menuitem" onclick="closeMenu()">Suivre</a>
+        <a href="#fonctions" role="menuitem" onclick="closeMenu()">Fonctionnalités</a>
+        <a href="#how" role="menuitem" onclick="closeMenu()">Comment ça marche</a>
+        <a href="about.html" role="menuitem" onclick="closeMenu()">À propos</a>
+        <div class="small">LogiTrack — Projet de stage</div>
+      </nav>
+    </div>
+
+    <main>
+      <section class="hero" id="suivre" aria-labelledby="hero-title">
+        <div style="flex:1">
+          <h1 id="hero-title">Suivez votre colis en temps réel</h1>
+          <p>Entrez votre numéro de suivi ci-dessous pour obtenir le statut et l'historique instantanément.</p>
+          <div class="search-row" role="search">
+            <label class="visually-hidden" for="tracking">Numéro de suivi</label>
+            <input id="tracking" class="input" type="text" placeholder="Ex. LT123456789FR" autocomplete="off">
+            <button id="trackBtn" class="btn btn-primary">Suivre</button>
+            <div class="muted">Les données sont gérées manuellement dans le code (objet <code>suivis</code>).</div>
+          </div>
+        </div>
+        <div style="width:240px" aria-hidden="true">
+          <div style="background:linear-gradient(180deg,var(--white),#fbfdff);padding:14px;border-radius:12px;box-shadow:var(--shadow)">
+            <strong style="color:var(--navy)">Pourquoi LogiTrack ?</strong>
+            <p style="margin:8px 0 0;color:#465b65;font-size:14px">Visibilité, simplicité et ergonomie — parfait pour un projet de stage.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Résultats -->
+      <section id="results" class="results" aria-live="polite"></section>
+
+      <!-- Fonctionnalités -->
+      <section id="fonctions" class="features" aria-labelledby="fonctions-title">
+        <h2 id="fonctions-title" style="grid-column:1/-1;color:var(--navy);margin:6px 0 0">Fonctionnalités</h2>
+        <div class="feature-card">
+          <div class="icon-wrap" aria-hidden="true">
+            <!-- truck icon -->
+            <svg width="22" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3h11v13h-11z" stroke="#005A9C" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 8h4l3 3v5" stroke="#005A9C" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="19" r="1.6" fill="#005A9C"/><circle cx="18" cy="19" r="1.6" fill="#005A9C"/></svg>
+          </div>
+          <div>
+            <div class="feature-title">Suivi en temps réel</div>
+            <div class="feature-desc">Mise à jour précise du statut à chaque étape de la livraison.</div>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-wrap" aria-hidden="true">
+            <!-- map pin icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 21s-6-4.35-6-9a6 6 0 1112 0c0 4.65-6 9-6 9z" stroke="#005A9C" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="2" fill="#005A9C"/></svg>
+          </div>
+          <div>
+            <div class="feature-title">Localisation</div>
+            <div class="feature-desc">Visualise le dernier emplacement connu du colis et son historique.</div>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-wrap" aria-hidden="true">
+            <!-- clock icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#005A9C" stroke-width="1.2"/><path d="M12 7v6l4 2" stroke="#005A9C" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="feature-title">Notifications</div>
+            <div class="feature-desc">Rappels et alertes (simulées dans ce projet) pour chaque changement critique.</div>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-wrap" aria-hidden="true">
+            <!-- shield icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l7 3v6c0 5-3.9 9.7-7 11-3.1-1.3-7-6-7-11V5l7-3z" stroke="#005A9C" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="feature-title">Sécurité</div>
+            <div class="feature-desc">Données gérées localement pour ce projet — confidentialité et simplicité.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section id="how" class="how" aria-labelledby="how-title">
+        <h2 id="how-title" style="color:var(--navy)">Comment ça marche</h2>
+        <div class="steps" role="list">
+          <div class="step" role="listitem">
+            <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:#fff;border:1px solid var(--gray-200)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 11h11" stroke="#005A9C" stroke-width="1.2"/><path d="M3 6h11" stroke="#005A9C" stroke-width="1.2"/><path d="M3 16h11" stroke="#005A9C" stroke-width="1.2"/></svg>
+            </div>
+            <div>
+              <strong>1. Saisissez votre numéro</strong>
+              <div class="muted">Ex : LT123456789FR</div>
+            </div>
+          </div>
+
+          <div class="step" role="listitem">
+            <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:#fff;border:1px solid var(--gray-200)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3v9l4 2" stroke="#005A9C" stroke-width="1.2"/></svg>
+            </div>
+            <div>
+              <strong>2. Consultez le statut</strong>
+              <div class="muted">Vue claire et timeline des étapes</div>
+            </div>
+          </div>
+
+          <div class="step" role="listitem">
+            <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:#fff;border:1px solid var(--gray-200)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 3h18v12H3z" stroke="#005A9C" stroke-width="1.2"/></svg>
+            </div>
+            <div>
+              <strong>3. Recevez votre colis</strong>
+              <div class="muted">Étapes claires jusqu'à la livraison</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Testimonials -->
+      <section class="testimonials" aria-labelledby="testo-title">
+        <h2 id="testo-title" style="color:var(--navy)">Avis</h2>
+        <div class="testimonial">
+          <div class="avatar">JM</div>
+          <div>
+            <strong>Julie M.</strong>
+            <div class="muted">Service fiable et simple — parfait pour suivre mes colis.</div>
+          </div>
+        </div>
+
+        <div class="testimonial">
+          <div class="avatar">AR</div>
+          <div>
+            <strong>Antoine R.</strong>
+            <div class="muted">Interface claire et rapide. Projet de qualité.</div>
+          </div>
+        </div>
+
+        <div class="testimonial">
+          <div class="avatar">LS</div>
+          <div>
+            <strong>Lina S.</strong>
+            <div class="muted">Bonne lisibilité, très utile pour un rendu de stage.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="cta" aria-labelledby="cta-title">
+        <h3 id="cta-title" style="margin:0">Prêt à tester ?</h3>
+        <p style="margin:0">Essayez LogiTrack dès aujourd'hui — entrez un numéro et cliquez sur <strong>Suivre</strong>.</p>
+        <div style="display:flex;gap:10px;align-items:center">
+          <a href="#suivre" class="btn" style="text-decoration:none">Suivre un colis</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div style="display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap">
+        <a href="about.html">À propos</a>
+        <span>© 2025 LogiTrack</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Data: edit directly here to add/remove tracking entries
+    const suivis = {
+      "LT123456789FR": {
+        status: "En cours de livraison",
+        events: [
+          "Pris en charge - Paris",
+          "En transit - Hub de Lyon",
+          "En attente de livraison - Marseille"
+        ],
+        dates: ["25/10/2025","26/10/2025","27/10/2025"]
+      },
+      "LT987654321FR": {
+        status: "Livré",
+        events: [
+          "Pris en charge - Lille",
+          "En transit - Bordeaux",
+          "Livré - Toulouse"
+        ],
+        dates: ["20/10/2025","21/10/2025","22/10/2025"]
+      }
+    };
+
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const burger = document.querySelector('.burger');
+    const trackBtn = document.getElementById('trackBtn');
+    const trackingInput = document.getElementById('tracking');
+    const results = document.getElementById('results');
+
+    function openMenu(){
+      mobileOverlay.classList.add('active');
+      burger.classList.add('active');
+      mobileOverlay.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMenu(){
+      mobileOverlay.classList.remove('active');
+      burger.classList.remove('active');
+      mobileOverlay.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    menuBtn.addEventListener('click', () => {
+      const isOpen = mobileOverlay.classList.contains('active');
+      if(isOpen) closeMenu(); else openMenu();
+    });
+
+    // close when clicking outside menu panel
+    mobileOverlay.addEventListener('click', (e) => {
+      if (e.target === mobileOverlay) closeMenu();
+    });
+
+    // keyboard accessibility
+    menuBtn.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); menuBtn.click(); }
+    });
+
+    trackBtn.addEventListener('click', () => {
+      const code = trackingInput.value.trim().toUpperCase();
+      if(!code){ alert('Entrez un numéro de suivi.'); return; }
+      const data = suivis[code];
+      if(!data){ alert('Aucun suivi trouvé pour ce numéro.'); return; }
+
+      // render results (newest on top)
+      results.style.display = 'block';
+      results.innerHTML = `
+        <div class="status-card" role="status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <div>
+            <div class="status-text">Statut : ${data.status}</div>
+            <div class="meta">Dernière mise à jour : ${data.dates[data.dates.length-1] || ''}</div>
+          </div>
+        </div>
+        <div class="timeline" aria-hidden="false">
+          ${data.events.slice().reverse().map((ev,i)=>{
+            const idx = data.events.length-1 - i;
+            const recent = idx === data.events.length-1 ? 'recent' : '';
+            return `<div class="event ${recent}"><strong>${data.events[idx]}</strong><br><small>${data.dates[idx] || ''}</small></div>`;
+          }).join('')}
+        </div>
+      `;
+      results.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  </script>
+</body>
+</html>

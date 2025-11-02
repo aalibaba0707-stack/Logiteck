@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>À propos — LogiTrack</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--navy:#005A9C;--white:#fff;--gray-100:#f5f7fa;--gray-200:#eef2f6;--muted:#667f8f;--shadow:0 8px 24px rgba(2,18,38,0.06);--fw:'Inter',system-ui,Roboto,Arial;}
+    *{box-sizing:border-box} body{margin:0;font-family:var(--fw);background:var(--gray-100);color:#06202e;line-height:1.5;overflow-x:hidden} .container{max-width:1100px;padding:20px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;padding:12px 0} .brand-mark{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;background:linear-gradient(135deg,#005A9C,#0077c8);box-shadow:var(--shadow)} nav.desktop{display:none}
+    .hero{background:var(--white);padding:22px;border-radius:14px;box-shadow:var(--shadow);margin-top:20px} .card{background:var(--white);padding:18px;border-radius:12px;box-shadow:var(--shadow);margin-top:16px}
+    footer{margin-top:30px;padding:18px 0;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--gray-200)}
+    @media(min-width:820px){nav.desktop{display:flex;gap:18px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display:flex;align-items:center;gap:12px"><div class="brand-mark">LT</div><div style="font-weight:700;color:var(--navy)">LogiTrack</div></div>
+      <nav class="desktop"><a href="index.html">Accueil</a><a href="index.html#suivre">Suivre</a></nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1>À propos de LogiTrack</h1>
+        <p>LogiTrack est un projet de suivi de colis conçu pour un projet de stage au lycée. Il illustre l'intégration front-end de fonctionnalités de suivi, d'une interface utilisateur mobile-first et d'éléments d'UX modernes.</p>
+        <div class="card">
+          <h3>Notre mission</h3>
+          <p>Rendre le suivi des envois simple et accessible, tout en offrant une interface claire pour apprendre et expérimenter le développement web.</p>
+          <h4>Utilisation</h4>
+          <p>Les suivis sont gérés directement dans le code, dans l'objet <code>suivis</code> de <code>index.html</code>. Modifie ou ajoute des entrées pour simuler des colis.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div style="display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap">
+        <a href="index.html">Retour</a>
+        <span>© 2025 LogiTrack</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
